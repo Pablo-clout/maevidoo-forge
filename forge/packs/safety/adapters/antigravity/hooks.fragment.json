@@ -1,0 +1,16 @@
+{
+  "forge-safety-command": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 forge/packs/safety/adapters/antigravity/hooks/pretooluse-command.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

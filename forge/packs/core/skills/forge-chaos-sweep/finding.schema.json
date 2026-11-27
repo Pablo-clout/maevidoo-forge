@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forge.local/schemas/forge-chaos-worker-report/1",
+  "title": "Forge Chaos Sweep Worker Report",
+  "description": "Host-neutral JSON Schema for /forge-chaos-sweep worker outputs (specialist testers, code readers, and journey testers). Mirrors worker.md, code-reader.md, and journey.md without replacing their prose.",
+  "oneOf": [
+    { "$ref": "#/$defs/specialistReport" },
+    { "$ref": "#/$defs/codeReaderReport" },
+    { "$ref": "#/$defs/journeyReport" }
+  ],
+  "$defs": {
+    "severity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Worker opinion of user impact: 3 = blocks task / loses or corrupts data / misleads about money, dates, or irreversible actions; 2 = real slowdown or misleading UX; 1 = minor."
+    },
+    "sure": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Worker confidence: 3 = replayed or traced with no innocent explanation; 2 = probable, one doubt or judged by eye; 1 = pointer worth a look."
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "telemetry": {
+      "type": "object",
+      "description": "Optional runtime telemetry populated automatically by deterministic workflow engines (never invented by workers).",
+      "additionalProperties": false,
+      "properties": {
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 },
+        "total_tokens": { "type": "integer", "minimum": 0 },
+        "model": { "type": "string" }
+      }
+    },
+    "specialistFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sev",
+        "sure",
+        "page",
+        "did",
+        "saw",
+        "breaks",
+        "costs_the_user",
+        "good_would_be",
+        "again",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "sev": { "$ref": "#/$defs/severity" },
+        "sure": { "$ref": "#/$defs/sure" },
+        "page": { "$ref": "#/$defs/nonEmptyString" },
+        "did": { "$ref": "#/$defs/nonEmptyString" },
+        "saw": { "$ref": "#/$defs/nonEmptyString" },
+        "breaks": { "$ref": "#/$defs/nonEmptyString" },
+        "costs_the_user": { "$ref": "#/$defs/nonEmptyString" },
+        "good_would_be": { "$ref": "#/$defs/nonEmptyString" },
+        "again": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Replay count from a fresh page (e.g. '2/2') or visual inspection widths (e.g. 'looked at 390, 768, 1280')."
+        },
+        "evidence": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Screenshot path opened by the worker, or exact quoted text/error visible on screen."
+        }
+      }
+    },
+    "specialistReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "workflow",
+        "specialty",
+        "temperament",
+        "widths_looked_at",
+        "actions",
+        "feeling",
+        "feeling_summary",
+        "findings",
+        "outside_my_specialty",
+        "tried_and_fine",
+        "not_tried"
+      ],
+      "properties": {
+        "role": { "const": "specialist" },
+        "charter_id": { "type": "string", "pattern": "^C[0-9]{2,}$" },
+        "workflow": { "$ref": "#/$defs/nonEmptyString" },
+        "specialty": { "type": "string", "enum": ["ux", "design", "workflow"] },
+        "temperament": { "$ref": "#/$defs/nonEmptyString" },
+        "widths_looked_at": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 200, "maximum": 4096 }
+        },
+        "actions": { "type": "integer", "minimum": 0 },
+        "feeling": { "type": "string", "enum": ["works", "shaky", "broken"] },
+        "feeling_summary": { "$ref": "#/$defs/nonEmptyString" },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/specialistFinding" }
+        },
+        "outside_my_specialty": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "tried_and_fine": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "not_tried": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "telemetry": { "$ref": "#/$defs/telemetry" }
+      }
+    },
+    "codeReaderFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sev",
+        "sure",
+        "location",
+        "what",
+        "path",
+        "who_is_hurt",
+        "why_still_believed"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "sev": { "$ref": "#/$defs/severity" },
+        "sure": { "$ref": "#/$defs/sure" },
+        "location": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Repository-relative file:line."
+        },
+        "what": { "$ref": "#/$defs/nonEmptyString" },
+        "path": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Input -> functions (with lines) -> wrong result. Full path is required for sev 3."
+        },
+        "who_is_hurt": { "$ref": "#/$defs/nonEmptyString" },
+        "why_still_believed": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "codeReaderReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "part",
+        "kind",
+        "files_read",
+        "files_total",
+        "lines_approx",
+        "findings",
+        "dropped_after_rereading",
+        "readability"
+      ],
+      "properties": {
+        "role": { "const": "code-reader" },
+        "part": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "type": "string", "enum": ["server", "browser", "other"] },
+        "files_read": { "type": "integer", "minimum": 0 },
+        "files_total": { "type": "integer", "minimum": 1 },
+        "lines_approx": { "type": "integer", "minimum": 0 },
+        "findings": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/codeReaderFinding" }
+        },
+        "dropped_after_rereading": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "readability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "easy_to_follow",
+            "comments_and_docs",
+            "where_i_got_lost",
+            "comments_that_would_have_saved_me"
+          ],
+          "properties": {
+            "easy_to_follow": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "comments_and_docs": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "where_i_got_lost": {
+              "type": "array",
+              "maxItems": 5,
+              "items": { "$ref": "#/$defs/nonEmptyString" }
+            },
+            "comments_that_would_have_saved_me": {
+              "type": "array",
+              "maxItems": 5,
+              "items": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "telemetry": { "$ref": "#/$defs/telemetry" }
+      }
+    },
+    "journeyFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sev",
+        "sure",
+        "screens",
+        "moment",
+        "cost_kind",
+        "cost",
+        "needed_instead",
+        "docs",
+        "again"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^F[1-9][0-9]*$" },
+        "sev": { "$ref": "#/$defs/severity" },
+        "sure": { "$ref": "#/$defs/sure" },
+        "screens": { "$ref": "#/$defs/nonEmptyString" },
+        "moment": { "$ref": "#/$defs/nonEmptyString" },
+        "cost_kind": {
+          "type": "string",
+          "enum": ["clicks", "retyped", "remembered", "dead end", "lost", "doubt", "words"]
+        },
+        "cost": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Counted friction (number of clicks/fields/etc.) or exact quoted text."
+        },
+        "needed_instead": { "$ref": "#/$defs/nonEmptyString" },
+        "docs": {
+          "type": "string",
+          "enum": ["silent", "documented_but_screen_silent"],
+          "description": "'silent' = product decision for Needs you; 'documented_but_screen_silent' = docs ask for it (cite in docs_ref) but screen omits it."
+        },
+        "docs_ref": {
+          "type": "string",
+          "description": "Required when docs is 'documented_but_screen_silent': where the document specifies the behaviour."
+        },
+        "again": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "journeyReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "person",
+        "errand",
+        "completed",
+        "effort",
+        "findings",
+        "what_went_well",
+        "dropped"
+      ],
+      "properties": {
+        "role": { "const": "journey" },
+        "person": {
+          "type": "string",
+          "enum": [
+            "the hurried one",
+            "the anxious one",
+            "the interrupted one",
+            "the one who gets it wrong",
+            "the one who cannot hold everything in their head"
+          ]
+        },
+        "errand": { "$ref": "#/$defs/nonEmptyString" },
+        "completed": { "type": "string", "enum": ["yes", "partly"] },
+        "stopped_at": {
+          "type": "string",
+          "description": "Required when completed is 'partly': where the errand stopped."
+        },
+        "effort": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["screens", "clicks", "fields_typed"],
+          "properties": {
+            "screens": { "type": "integer", "minimum": 0 },
+            "clicks": { "type": "integer", "minimum": 0 },
+            "fields_typed": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "findings": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/journeyFinding" }
+        },
+        "what_went_well": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "dropped": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "telemetry": { "$ref": "#/$defs/telemetry" }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# Machine deny patterns for PreToolUse (Bash)
+# Consumed by adapters/claude/hooks/pretooluse-bash.py — NOT for LLM hop-1 load.
+# Keep messages short; avoid teaching bypass recipes in stderr beyond the category id.
+
+version: 2
+
+# Each pattern is a case-insensitive extended regex matched against the full bash command string.
+# category: db | exfil | secrets | filesystem | vcs
+
+patterns:
+  - id: db-drop
+    category: db
+    regex: '\bDROP\s+(TABLE|DATABASE|SCHEMA|INDEX|COLLECTION|USER|VIEW|SEQUENCE)\b'
+  - id: db-truncate
+    category: db
+    regex: '\bTRUNCATE\s+(TABLE\s+)?\w'
+  - id: db-delete-nowhere
+    category: db
+    regex: '\bDELETE\s+FROM\s+\w+\s*(;|"|'')?\s*$'
+  - id: db-migrate-reset
+    category: db
+    regex: 'migrate\s+reset|prisma\s+migrate\s+reset|flyway\s+clean|rails\s+db:(drop|reset)|artisan\s+migrate:fresh'
+  - id: db-nosql-wipe
+    category: db
+    regex: 'dropDatabase\s*\(|db\.\w+\.drop\s*\(|redis-cli\s+[^\n]*\bFLUSH(ALL|DB)\b'
+  - id: exfil-pipe-shell
+    category: exfil
+    regex: 'curl\s+[^\n|]*\|\s*(ba|z)?sh|wget\s+[^\n|]*\|\s*(ba|z)?sh'
+  - id: exfil-paste-hosts
+    category: exfil
+    regex: '(curl|wget)\s+[^\n]*(pastebin\.|gist\.github|hastebin|transfer\.sh|webhook\.site|requestbin|ngrok\.io)'
+  - id: secrets-env-print
+    category: secrets
+    regex: '\b(cat|head|tail|less|more|bat|strings)\s+[^\n]*\.env(\.\w+)?\b|printenv\s+|env\s*\|\s*grep'
+  - id: secrets-publish
+    category: secrets
+    regex: '\bnpm\s+publish\b|\bpypi\b.*upload|\btwine\s+upload\b|\bdocker\s+push\b|\bcargo\s+publish\b'
+  - id: fs-rm-rootish
+    category: filesystem
+    regex: '\brm\s+(-[a-zA-Z]*f[a-zA-Z]*|--force).*(\s/|\s~(/|\s|$)|/\*|~\*)'
+  - id: vcs-force-push
+    category: vcs
+    regex: 'git\s+push\s+[^\n]*(--force\b|--force-with-lease\b|\s-f\b)'
+
+# Deny override: if a command matches a deny pattern above BUT also matches one of
+# these, it is allowed (single read-only statement shapes; no chaining).
+allow_if_matches:
+  - id: readonly-psql
+    regex: '^[^;|&]*\bpsql\b[^;|&]*(-c|--command)[ =]["'']?\s*SELECT\b[^;]*$'

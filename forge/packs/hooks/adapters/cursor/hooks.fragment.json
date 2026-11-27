@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python3 forge/packs/hooks/adapters/cursor/hooks/before-shell.py",
+        "failClosed": true
+      }
+    ]
+  }
+}

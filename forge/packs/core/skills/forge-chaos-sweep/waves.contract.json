@@ -1,0 +1,74 @@
+{
+  "contract": "forge-chaos-waves/1",
+  "description": "Declarative wave and isolation contract for /forge-chaos-sweep. Readable as prose by any harness and executable by hosts with a deterministic workflow engine (e.g. Antigravity /run-workflow, Claude Code Workflow tool).",
+  "invariants": {
+    "blind_isolation": true,
+    "shared_board": false,
+    "workers_see_each_other": false,
+    "workers_read_ledger": false,
+    "workers_write_product_code": false,
+    "main_checks_contradictions_and_singletons": true,
+    "host_model_named_by_forge": false
+  },
+  "waves": {
+    "pilot_size": 3,
+    "default_wave_size": 5,
+    "cost_recheck_multiplier": 2.0,
+    "on_cost_exceeded": "ask_human_before_continuing",
+    "on_limit_error": {
+      "action": "halve_wave_size",
+      "min_wave_size": 1,
+      "max_consecutive_errors": 2,
+      "on_max_errors": "stop_spawning_and_finish_with_returned",
+      "retry_in_loop": false
+    },
+    "early_stop": {
+      "condition": "zero_new_findings_in_wave",
+      "scope": "remaining_testers_of_covered_workflows",
+      "record_skipped_in_report": true
+    }
+  },
+  "roles": {
+    "specialist": {
+      "brief": "forge/packs/core/skills/forge-chaos-sweep/worker.md",
+      "specialties_ref": "forge/packs/core/skills/forge-chaos-sweep/specialties.md",
+      "default_per_workflow": 3,
+      "specialties": ["ux", "design", "workflow"],
+      "max_findings": null,
+      "reads_code": false,
+      "touches_running_app": true,
+      "report_schema": "forge/packs/core/skills/forge-chaos-sweep/finding.schema.json#/$defs/specialistReport"
+    },
+    "code-reader": {
+      "brief": "forge/packs/core/skills/forge-chaos-sweep/code-reader.md",
+      "default_count": 5,
+      "max_findings": 8,
+      "reads_code": true,
+      "touches_running_app": false,
+      "report_schema": "forge/packs/core/skills/forge-chaos-sweep/finding.schema.json#/$defs/codeReaderReport"
+    },
+    "journey": {
+      "brief": "forge/packs/core/skills/forge-chaos-sweep/journey.md",
+      "default_count": 5,
+      "max_findings": 8,
+      "reads_code": false,
+      "touches_running_app": true,
+      "report_schema": "forge/packs/core/skills/forge-chaos-sweep/finding.schema.json#/$defs/journeyReport"
+    }
+  },
+  "report_validation": {
+    "schema_file": "forge/packs/core/skills/forge-chaos-sweep/finding.schema.json",
+    "validator_command": "node forge/packs/core/tools/chaos.mjs validate-report --file <report.json>",
+    "wave_planner_command": "node forge/packs/core/tools/chaos.mjs plan-waves --dir <scratch> --json",
+    "on_invalid_report": {
+      "max_format_retries": 1,
+      "after_retries": "record_invalid_worker_and_continue"
+    }
+  },
+  "verification_priority": [
+    "sev_3_always_checked_by_hand",
+    "contradictions_between_testers_of_same_workflow",
+    "singletons_that_block_or_hurt_user",
+    "weak_or_ambiguous_evidence"
+  ]
+}

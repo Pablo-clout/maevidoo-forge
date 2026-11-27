@@ -1,0 +1,68 @@
+{
+  "lang": "en",
+  "project": "Kitroom",
+  "date": "2026-11-15",
+  "summary": "Every feature was opened in a real browser, on a phone and on a desktop, and walked flow by flow. Each defect has its capture before and after. The fixes are on their own branch; nothing was decided for you.",
+  "branch": "forge/sweep-2026-11-15",
+  "sweptAt": "a1b2c3d",
+  "mode": "fix",
+  "tests": { "before": "42 pass, 0 fail", "after": "45 pass, 0 fail" },
+  "figures": [{ "value": "3", "label": "regression tests added" }],
+  "needsYou": [
+    { "group": "Data", "items": ["A loan can be returned twice from two phones at the same time: refuse the second return, or record both?"] }
+  ],
+  "features": [
+    { "id": "lend", "name": "Lend an item", "core": true, "flows": "6 / 6", "ui": "2 findings" },
+    { "id": "find", "name": "Search and filters", "core": false, "flows": "4 / 4", "ui": "ok" }
+  ],
+  "notSwept": [],
+  "stability": {
+    "guards": "14 / 14 pass",
+    "touchedAgain": [],
+    "waiting": ["Q-3 (asked 2026-11-08): refuse a second return of the same loan, or record both?"],
+    "silenced": ["L-7 lend · button \"Lend\" · H2-primary-action — validated 2026-11-08, no trigger"],
+    "flaky": ["History list once showed 9 rows instead of 10 — not reproduced in 3 runs"]
+  },
+  "wholeApp": "Navigation is consistent; the same action is called 'Return' on one screen and 'Give back' on another.",
+  "sections": [
+    {
+      "title": "Measurements",
+      "intro": "Optional: any table or list worth keeping — timings, sizes, counts before and after.",
+      "table": { "columns": ["Screen", "Before", "After"], "rows": [["Item list, 1 000 items", "8.5 s", "1.2 s"]] },
+      "bullets": []
+    }
+  ],
+  "findings": [
+    {
+      "id": "S-1",
+      "severity": "High",
+      "features": ["lend"],
+      "where": "Lend form",
+      "since": "new",
+      "what": "Pressing Lend twice quickly lent the item twice: the list showed two loans for the same tent.",
+      "now": "The button is disabled while the loan is being saved; a second press does nothing.",
+      "commit": "d4e5f6a",
+      "reproduce": ["Open Lend an item", "Fill the form", "Double-click Lend"],
+      "capture": "node forge/packs/visual-qa/tools/run-ui-probe.mjs --url http://localhost:4500/ --mobile --before \"…fill and double-click…\" --screenshot <img> --clip \"#items\"",
+      "status": "fixed",
+      "before": "img/S-1-before.jpg",
+      "after": "img/S-1-after.jpg"
+    },
+    {
+      "id": "S-2",
+      "severity": "Medium",
+      "features": ["find", "lend"],
+      "where": "Search box, at 375 px",
+      "since": "regression",
+      "what": "The search box is wider than the screen on a phone: the page scrolls sideways.",
+      "why": "The fix was reverted: it hid the status filter on desktop.",
+      "reproduce": ["Open the app at 375 px wide", "Look at the search row"],
+      "status": "reverted",
+      "before": "img/S-2-before.jpg"
+    }
+  ],
+  "fixedSince": ["S-4 of 2026-11-08 — the overdue badge no longer shows on returned items"],
+  "notTested": ["A real phone: everything ran in a headless browser."],
+  "next": ["Answer the decisions above; the next sweep re-checks what is still open."],
+  "runNotes": ["12 agents; the History feature restarted the app twice (flaky seed)."]
+}
