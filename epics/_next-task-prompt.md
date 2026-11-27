@@ -14,6 +14,8 @@
 
 ## Context (1 paragraph)
 
+Zones acceptées à /forge-init (2026-11-27) : **recettes** (créer, modifier, supprimer une recette), **catalogue** (catégories, étiquettes, recherche), **cuisine** (mode pas à pas), **nutrition** (photo des ingrédients, composition du plat). La première tâche crée la carte des zones, la règle d'import et la commande de test par zone, avec la première zone (`forge/packs/core/rules/areas.md`).
+
 Last completed: …  
 Remaining: …
 
