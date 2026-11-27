@@ -2,7 +2,7 @@
 
 > Ce document est le tien : modifie-le quand tu veux. Il appartient au projet, pas à Forge.
 > Les agents le lisent avant chaque plan et chaque sweep. Ils ne le modifient jamais seuls : s'ils voient un écart avec le code, ils te montrent ce qu'ils changeraient et pourquoi, et te demandent.
-> status: draft — unconfirmed
+> status: confirmed 2026-11-27
 
 ## 1. Le produit
 - **Ce que c'est :** un livre de recettes de cuisine sur smartphone. On y garde ses recettes, on les retrouve et on les suit en cuisinant. *(source : Pablo, 2026-11-27)*
@@ -45,3 +45,4 @@ Le détail vivant des parcours sera dans `docs/features.md`, construit par le pr
 
 ## Historique
 <!-- une ligne par changement accepté : date · section · ce qui change · pourquoi · qui l'a proposé -->
+- 2026-11-27 · toutes · première version (/forge-init), photo des ingrédients et composition du plat ajoutées · demandé par Pablo · confirmée par Pablo
